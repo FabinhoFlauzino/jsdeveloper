@@ -1,10 +1,13 @@
 {
-  "hosting": {
-    "public": "public",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ]
-  }
+    "hosting": {
+        "public": "public",
+        "ignore": ["firebase.json", "**/.*", "**/node_modules/**"]
+    },
+    "apiKey": "AIzaSyBm7mRUk-Ugz7mVyIIlmpvsuRO_ynCSypY",
+    "authDomain": "ferrari-fflauzino.firebaseapp.com",
+    "projectId": "ferrari-fflauzino",
+    "storageBucket": "ferrari-fflauzino.appspot.com",
+    "messagingSenderId": "172008510674",
+    "appId": "1:172008510674:web:889817e46d33930f5b090b",
+    "measurementId": "G-LRQ2M1H6X5"
 }
