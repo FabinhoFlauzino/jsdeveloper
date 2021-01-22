@@ -1,5 +1,10 @@
 import firebase from "./firebase-app";
-import { getFormValues, hideAlertError, showAlertError } from "./utils";
+import {
+    getFormValues,
+    getQueryString,
+    hideAlertError,
+    showAlertError,
+} from "./utils";
 
 const authPage = document.querySelector("main#auth");
 
@@ -40,8 +45,14 @@ if (authPage) {
                 showAuthForm("reset");
                 break;
             default:
-                //showAuthForm('auth-email')
-                showAuthForm("login");
+                const params = getQueryString();
+
+                if (params.mode === "resetPassword") {
+                    showAuthForm("reset");
+                } else {
+                    //showAuthForm('auth-email')
+                    showAuthForm("login");
+                }
         }
     };
 
@@ -98,17 +109,88 @@ if (authPage) {
         const values = getFormValues(formAuthLogin);
 
         auth.signInWithEmailAndPassword(values.email, values.password)
-            .then((response) => (window.location.href = "/"))
+            .then((response) => {
+                const value = getQueryString();
+
+                if (value.url) {
+                    win.location.href = `http://localhost:8080/${value.url}`;
+                } else {
+                    window.location.href = "/";
+                }
+            })
             .catch(showAlertError(formAuthLogin));
     });
 
+    const formForget = document.querySelector("#forget");
+    //const message = formForget.querySelector(".message");
+    //const field = formForget.querySelector(".field");
+    //const actions = formForget.querySelector(".actions");
+
+    formForget.addEventListener("submit", (e) => {
+        e.preventDefault();
+        hideAlertError(formForget);
+
+        const values = getFormValues(formForget);
+        const btnSubmit = formForget.querySelector("[type=submit]");
+        const message = formForget.querySelector(".message");
+        const field = formForget.querySelector(".field");
+        const actions = formForget.querySelector(".actions");
+
+        message.style.display = "none";
+
+        btnSubmit.disabled = true;
+        btnSubmit.innerHTML = "Enviando...";
+
+        auth.sendPasswordResetEmail(values.email)
+            .then(() => {
+                field.style.display = "none";
+                actions.style.display = "none";
+                message.style.display = "block";
+            })
+            .catch((error) => {
+                field.style.display = "block";
+                actions.style.display = "block";
+                showAlertError(formForget)(error);
+            })
+            .finally(() => {
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = "Enviar";
+            });
+    });
+
+    formForget = document.querySelector("#reset");
+
+    formReset.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const btnSubmit = formReset.querySelector("[type=submit]");
+
+        btnSubmit.disabled = true;
+        btnSubmit.innerHTML = "Redefinindo...";
+
+        const { oobCode } = getQueryString();
+        const { password } = getFormValues(formReset);
+
+        hideAlertError(formReset);
+
+        auth.verifyPasswordResetCode(oobCode)
+            .then(() => auth.confirmPasswordReset(oobCode, password))
+            .then(() => {
+                window.location.href = "/";
+            })
+            .catch(showAlertError(formReset))
+            .finally(() => {
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = "Redefinir";
+            });
+    });
     document
         .querySelector("#login .facebook")
         .addEventListener("click", (e) => {
             const provider = new firebase.auth.FacebookAuthProvider();
 
             auth.signInWithRedirect(provider);
-            /*
+            /* 
         auth
             .signInWithPopup(provider)
             .then( window.location.href = "/")
