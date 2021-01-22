@@ -101,7 +101,18 @@ export function formatCurrency(value) {
 }
 
 export function onSnapshotError(err) {
-    window.location.href = `/auth.html?url=${encodeURIComponent(
-        window.location.pathname
-    )}${encodeURIComponent(window.location.search)}`;
+    const pathname = encodeURIComponent(window.location.pathname);
+    const search = encodeURIComponent(window.location.search);
+
+    window.location.href = `/auth.html?url=${pathname}${search}`;
+}
+
+export function getQueryStringFromJSON(json) {
+    const params = [];
+
+    Object.keys(json).forEach((key) => {
+        params.push(`${key}=${json[key]}`);
+    });
+
+    return params.join("&");
 }

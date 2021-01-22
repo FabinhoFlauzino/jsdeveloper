@@ -110,10 +110,14 @@ if (authPage) {
 
         auth.signInWithEmailAndPassword(values.email, values.password)
             .then((response) => {
-                const value = getQueryString();
+                const values = getQueryString();
 
-                if (value.url) {
-                    win.location.href = `http://localhost:8080/${value.url}`;
+                if (values.url) {
+                    if (window.location.hostname === "localhost") {
+                        window.location.href = `http://localhost:8080${values.url}`;
+                    } else {
+                        window.location.href = `https://ferrari-jrangel.web.app${values.url}`;
+                    }
                 } else {
                     window.location.href = "/";
                 }
@@ -122,19 +126,18 @@ if (authPage) {
     });
 
     const formForget = document.querySelector("#forget");
-    //const message = formForget.querySelector(".message");
-    //const field = formForget.querySelector(".field");
-    //const actions = formForget.querySelector(".actions");
 
     formForget.addEventListener("submit", (e) => {
         e.preventDefault();
-        hideAlertError(formForget);
 
-        const values = getFormValues(formForget);
         const btnSubmit = formForget.querySelector("[type=submit]");
         const message = formForget.querySelector(".message");
         const field = formForget.querySelector(".field");
         const actions = formForget.querySelector(".actions");
+
+        hideAlertError(formForget);
+
+        const values = getFormValues(formForget);
 
         message.style.display = "none";
 
@@ -150,6 +153,7 @@ if (authPage) {
             .catch((error) => {
                 field.style.display = "block";
                 actions.style.display = "block";
+
                 showAlertError(formForget)(error);
             })
             .finally(() => {
@@ -158,7 +162,7 @@ if (authPage) {
             });
     });
 
-    formForget = document.querySelector("#reset");
+    const formReset = document.querySelector("#reset");
 
     formReset.addEventListener("submit", (e) => {
         e.preventDefault();
@@ -176,7 +180,8 @@ if (authPage) {
         auth.verifyPasswordResetCode(oobCode)
             .then(() => auth.confirmPasswordReset(oobCode, password))
             .then(() => {
-                window.location.href = "/";
+                hideAuthForms();
+                showAuthForm("login");
             })
             .catch(showAlertError(formReset))
             .finally(() => {
@@ -184,13 +189,14 @@ if (authPage) {
                 btnSubmit.innerHTML = "Redefinir";
             });
     });
+
     document
         .querySelector("#login .facebook")
         .addEventListener("click", (e) => {
             const provider = new firebase.auth.FacebookAuthProvider();
 
             auth.signInWithRedirect(provider);
-            /* 
+            /*
         auth
             .signInWithPopup(provider)
             .then( window.location.href = "/")

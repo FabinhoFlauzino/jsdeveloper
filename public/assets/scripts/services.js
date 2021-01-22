@@ -2,7 +2,10 @@ import firebase from "./firebase-app";
 import {
     appendTemplate,
     formatCurrency,
+    getFormValues,
     getQueryString,
+    getQueryStringFromJSON,
+    onSnapshotError,
     setFormValues,
 } from "./utils";
 
@@ -143,15 +146,26 @@ document.querySelectorAll("#schedules-services").forEach((page) => {
 
         renderServiceOptions(page, services);
         renderServiceSummary(page, services);
-    });
+    }, onSnapshotError);
 
+    const form = page.querySelector("form");
     const params = getQueryString();
 
-    setFormValues(page.querySelector("form"), params);
+    setFormValues(form, params);
 
     const buttonSummary = page.querySelector("#btn-summary-toggle");
 
     buttonSummary.addEventListener("click", () => {
         page.querySelector("aside").classList.toggle("open");
+    });
+
+    form.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const values = getFormValues(form);
+
+        window.location.href = `/schedules-payment.html?${getQueryStringFromJSON(
+            values
+        )}`;
     });
 });
